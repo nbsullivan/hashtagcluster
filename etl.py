@@ -19,13 +19,15 @@ if __name__ == '__main__':
 
 	hashTag = '#tacobell'
 
-	tweets = api.search(q = hashTag, count = 3000 )
+	cursor = tweepy.Cursor(api.search, q = hashTag).items(3000)
 
 	tweetlist = []
-	k = 1
-	for item in tweets:
+	for item in cursor:
 		tweetlist.append(item._json)
 		print(item._json['text'])
 
+	
+
+	
 
 	print len(tweetlist)
