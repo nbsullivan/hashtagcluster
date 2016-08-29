@@ -26,6 +26,10 @@ if __name__ == '__main__':
 		tweetlist.append(item._json)
 		print(item._json['text'])
 
+	f = open('data/sampletweets.txt', 'w')
+	json.dump(tweetlist, f)
+	f.close()
+
 	
 
 	
