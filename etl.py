@@ -45,10 +45,18 @@ class MyStreamListener(tweepy.StreamListener):
         	# send the tweets to the clustering algo.
 
 	def clean_tweet(self, tweet):
-    	# do something here to clean up the tweet for processing.
-    	# this is where the preprocessing will take place.
+		# input a tweet and get back a dictionary form of its relevant content.
+		# return tweet text, username, tweet_id, & geo-location (coordinates)
+		tweet_dict = {}
+		tweet_dict['text'] = tweet['text']
+		tweet_dict['screen_name'] = tweet['user']['screen_name']
+		tweet_dict['tweet_id'] = tweet['id']
+		
+		# return tweets with geo-location
+		if tweet['geo'] != None:
+			tweet_dict['geo'] = tweet['geo']['coordinates']
 
-		return tweet
+		return tweet_dict
 
     	
 
