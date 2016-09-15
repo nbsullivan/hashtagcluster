@@ -1,4 +1,5 @@
 
+import numpy as np
 import json
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -29,8 +30,23 @@ def vectorize_tweets(tweetlist):
     vectorizer = CountVectorizer(min_df = 1)
     return vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
 
+def vectorize_file(in_file, out_file):
+    """Vectorize a JSON file."""
+    fpi = open(in_file, 'r')
+    tweets = json.load(fpi)
+    fpi.close()
+
+    vectorizer = CountVectorizer(min_df = 1)
+    vect_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweets))
+
+    fpo = open(out_file, 'w')
+    json.dump(vect_tweets.toarray().tolist(), fpo)
+    fpo.close()
+
 def main():
-    clean_tweets('data/sampletweets.txt', 'data/cltweets.json')
+    inf = 'data/clean/HowtoConfuseaMillennial_batch0'
+    outf = 'data/vectorized/HowtoConfuseaMillennial_batch0'
+    vectorize_file(inf, outf)
 
 if __name__ == '__main__':
     main()
