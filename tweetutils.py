@@ -30,22 +30,26 @@ def vectorize_tweets(tweetlist):
     vectorizer = CountVectorizer(min_df = 1)
     return vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
 
-def vectorize_file(in_file, out_file):
-    """Vectorize a JSON file."""
-    fpi = open(in_file, 'r')
-    tweets = json.load(fpi)
-    fpi.close()
+def vectorize_file(in_files, out_file):
+    """Vectorize a list of JSON files."""
+    tweets = []
+
+    for infile in in_files:
+        fpi = open(infile, 'r')
+        tweetf = json.load(fpi)
+        fpi.close()
+        tweets = tweets + map(lambda tweet: tweet['text'], tweets)
 
     vectorizer = CountVectorizer(min_df = 1)
-    vect_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweets))
+    vect_tweets = vectorizer.fit_transform(tweets)
 
     fpo = open(out_file, 'w')
     json.dump(vect_tweets.toarray().tolist(), fpo)
     fpo.close()
 
 def main():
-    inf = 'data/clean/HowtoConfuseaMillennial_batch0'
-    outf = 'data/vectorized/HowtoConfuseaMillennial_batch0'
+    infs = ['data/clean/HowtoConfuseaMillennial_batch0']
+    outf = 'data/vectorized/HowtoConfuseaMillennial'
     vectorize_file(inf, outf)
 
 if __name__ == '__main__':
