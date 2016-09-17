@@ -38,7 +38,10 @@ def vectorize_file(in_files, out_file):
         fpi = open(infile, 'r')
         tweetf = json.load(fpi)
         fpi.close()
-        tweets = tweets + map(lambda tweet: tweet['text'], tweets)
+        tweets = tweets + map(lambda tweet: tweet['text'], tweetf)
+    
+    print tweets
+
 
     vectorizer = CountVectorizer(min_df = 1)
     vect_tweets = vectorizer.fit_transform(tweets)
@@ -48,9 +51,18 @@ def vectorize_file(in_files, out_file):
     fpo.close()
 
 def main():
-    infs = ['data/clean/HowtoConfuseaMillennial_batch0']
-    outf = 'data/vectorized/HowtoConfuseaMillennial'
-    vectorize_file(inf, outf)
+    predir = 'data/clean/'
+    hashtag = 'HowtoConfuseaMillennial'
+    pre = predir + hashtag + '_batch'
+    post = '.txt'
+    infs = []
+    
+    for k in xrange(0, 10 + 1):
+        filepath = pre + str(k) + post
+        infs = infs + [filepath]
+    
+    outf = 'data/vectorized/HowtoConfuseaMillennial.json'
+    vectorize_file(infs, outf)
 
 if __name__ == '__main__':
     main()
