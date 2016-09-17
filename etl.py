@@ -1,10 +1,15 @@
 import tweepy
 import json
 from pprint import pprint as pp
+from sklearn.cluster import KMeans
+from sklearn.feature_extraction.text import CountVectorizer
+
 
 class MyStreamListener(tweepy.StreamListener):
-
+	
+	# tweetlist stores 100 tweets, tweetlistmaster stores all imported tweets
 	tweetlist = []
+	tweetlistmaster = []
 	tweetcounter = 0
 	batchnumber = 0
 
@@ -15,12 +20,11 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 	def on_status(self, status):
-
     	# we want to grab tweets in batches of 100 to send to the clustering algo, or maybe less than 100 or maybe more
     	# also at this stage we want to have something to process the tweets.
 		self.tweetlist.append(self.clean_tweet(status._json))
+		self.tweetlistmaster.append(self.clean_tweet(status._json))
 		self.tweetcounter += 1
-		print self.searchterm
 
 		print self.tweetcounter
 
@@ -42,7 +46,17 @@ class MyStreamListener(tweepy.StreamListener):
 			# increment batch couter.
 			self.batchnumber += 1
 
-        	# send the tweets to the clustering algo.
+			# vectorize master tweetlist list
+			vectorized_tweets = self.vectorize_tweets(self.tweetlistmaster)
+
+			# send vectorized tweets to clustering algorithm
+			clf = KMeans(n_clusters=3)
+			tweet_pred = clf.fit_predict(vectorized_tweets)
+
+			# UP NEXT: create happy json to send out to visualization layer
+
+			# UP LATER: Shillouette analysis sklearn 
+
 
 	def clean_tweet(self, tweet):
 		# input a tweet and get back a dictionary form of its relevant content.
@@ -58,6 +72,10 @@ class MyStreamListener(tweepy.StreamListener):
 
 		return tweet_dict
 
+	def vectorize_tweets(self, tweetlist):
+		# vectorized tweetlist inputs and outputs a sparce matrix representation
+	    vectorizer = CountVectorizer(min_df = 1)
+	    return vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     	
 
 
@@ -81,7 +99,9 @@ if __name__ == '__main__':
 	api = tweepy.API(auth)
 
 	# search term
-	hashTag = '#HowtoConfuseaMillennial'
+	hashTag = ''
+	print hashTag
+
 
 	# "creating stream listener"
 	SL = MyStreamListener(searchitem = hashTag)
