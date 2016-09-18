@@ -15,6 +15,9 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 	# we want to subset the vectorized tweets based on tweet_pred, also create a list of dictionarys with word counts per cluster
 	dict_list = []
 
+	# put everything into the full_info dict
+	full_info = {}
+
 
 	# loop over number of subsets
 	for k in range(n):
@@ -63,7 +66,11 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 
 		dict_list.append(cluster_dict)
 
-	return dict_list
+	full_info["Clusterlist"] = dict_list
+	full_info["totaltweet"] = len(tweetlistmaster)
+
+
+	return full_info
 
 
 
@@ -97,15 +104,9 @@ if __name__ == '__main__':
 
 
 			# vectorize
-			vectorized_tweets = vectorize_tweets(tweetlistmaster)
+			vectorized_tweets, names = vectorize_tweets(tweetlistmaster)
 
-
-			# wtf is vectorizer doing.
-			vectorizer = CountVectorizer(min_df = 1)
-			map(lambda tweet: tweet['text'], tweetlistmaster)
-			vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlistmaster))
-			names = vectorizer.get_feature_names()
-
+			# need code for silhouette analysis
 			n = 3
 			# cluster
 			clf = KMeans(n_clusters=n)

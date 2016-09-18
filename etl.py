@@ -35,8 +35,8 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 	# we want to subset the vectorized tweets based on tweet_pred, also create a list of dictionarys with word counts per cluster
 	dict_list = []
 
-	userlist = [tweet["screen_name"] for tweet in tweetlistmaster]
-	tweet_id = [tweet['tweet_id'] for tweet in tweetlistmaster]
+	# put everything into the full_info dict
+	full_info = {}
 
 
 	# loop over number of subsets
@@ -86,7 +86,11 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 
 		dict_list.append(cluster_dict)
 
-	return dict_list
+	full_info["Clusterlist"] = dict_list
+	full_info["totaltweet"] = len(tweetlistmaster)
+
+
+	return full_info
     
 
 
