@@ -5,6 +5,27 @@ from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import CountVectorizer
 
 
+def clean_tweet(tweet):
+	# input a tweet and get back a dictionary form of its relevant content.
+	# return tweet text, username, tweet_id, & geo-location (coordinates)
+	tweet_dict = {}
+	tweet_dict['text'] = tweet['text']
+	tweet_dict['screen_name'] = tweet['user']['screen_name']
+	tweet_dict['tweet_id'] = tweet['id']
+		
+	# return tweets with geo-location
+	if tweet['geo'] != None:
+		tweet_dict['geo'] = tweet['geo']['coordinates']
+
+	return tweet_dict
+
+def vectorize_tweets(tweetlist):
+	# vectorized tweetlist inputs and outputs a sparce matrix representation
+	vectorizer = CountVectorizer(min_df = 1)
+	return vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    
+
+
 class MyStreamListener(tweepy.StreamListener):
 	
 	# tweetlist stores 100 tweets, tweetlistmaster stores all imported tweets
@@ -15,6 +36,7 @@ class MyStreamListener(tweepy.StreamListener):
 
 	def __init__(self, api=None, searchitem = None):
 		# over ride the base _init_ method to accept a serach term parameter
+
 		self.api = api
 		self.searchterm = searchitem
 
@@ -22,8 +44,10 @@ class MyStreamListener(tweepy.StreamListener):
 	def on_status(self, status):
     	# we want to grab tweets in batches of 100 to send to the clustering algo, or maybe less than 100 or maybe more
     	# also at this stage we want to have something to process the tweets.
-		self.tweetlist.append(self.clean_tweet(status._json))
-		self.tweetlistmaster.append(self.clean_tweet(status._json))
+
+		cleantweet = clean_tweet(status._json)
+		self.tweetlist.append(cleantweet)
+		self.tweetlistmaster.append(cleantweet)
 		self.tweetcounter += 1
 
 		print self.tweetcounter
@@ -53,30 +77,16 @@ class MyStreamListener(tweepy.StreamListener):
 			clf = KMeans(n_clusters=3)
 			tweet_pred = clf.fit_predict(vectorized_tweets)
 
-			# UP NEXT: create happy json to send out to visualization layer
+			# UP NEXT: create happy json to send out for visualization
 
 			# UP LATER: Shillouette analysis sklearn 
 
 
-	def clean_tweet(self, tweet):
-		# input a tweet and get back a dictionary form of its relevant content.
-		# return tweet text, username, tweet_id, & geo-location (coordinates)
-		tweet_dict = {}
-		tweet_dict['text'] = tweet['text']
-		tweet_dict['screen_name'] = tweet['user']['screen_name']
-		tweet_dict['tweet_id'] = tweet['id']
-		
-		# return tweets with geo-location
-		if tweet['geo'] != None:
-			tweet_dict['geo'] = tweet['geo']['coordinates']
 
-		return tweet_dict
 
-	def vectorize_tweets(self, tweetlist):
-		# vectorized tweetlist inputs and outputs a sparce matrix representation
-	    vectorizer = CountVectorizer(min_df = 1)
-	    return vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-    	
+
+
+	
 
 
 
@@ -103,34 +113,12 @@ if __name__ == '__main__':
 	print hashTag
 
 
-	# "creating stream listener"
+	# creating stream listener
 	SL = MyStreamListener(searchitem = hashTag)
 
-	# "starting stream? maybe?"
+	# starting stream? maybe?
 	mystream = tweepy.Stream(auth = api.auth, listener = SL)
 
-	# "filtering?"
+	# filtering?
 	mystream.filter(track=[hashTag])
 	
-
-
-
-	# # get interatble cursor object.
-	# cursor = tweepy.Cursor(api.search, q = hashTag).items(3000)
-
-	# # load tweets into a list for writng to file
-	# tweetlist = []
-	# for item in cursor:
-	# 	tweetlist.append(item._json)
-	# 	print(item._json['text'])
-
-	# do not uncomment unless you want to override the sample tweet set.
-	# f = open('data/sampletweets.txt', 'w')
-	# json.dump(tweetlist, f)
-	# f.close()
-
-	
-
-	
-	# just checking number of tweets recived.
-	# print len(tweetlist)
