@@ -38,6 +38,10 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 	# put everything into the full_info dict
 	full_info = {}
 
+	# extract users and tweet_ids from tweetmasterlist
+	userlist = [tweet["screen_name"] for tweet in tweetlistmaster]
+	tweet_id = [tweet['tweet_id'] for tweet in tweetlistmaster]
+
 
 	# loop over number of subsets
 	for k in range(n):
@@ -67,23 +71,29 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 		# reduce the size of the word dictionary
 		reduc_word = {k:v for k,v in word_dict.items() if v != 0}
 
-		# pp(reduc_word)
 
-		cluster_dict["words"] = reduc_word
 
 		# get unigue users and number of tweets from them.
 		cluster_users = [userlist[i] for i in indexes]
 		user_dict = dict(Counter(cluster_users))
 
-
-		cluster_dict["users"] = user_dict
-
 		# get tweet ids users and number of tweets from them.
 		tweet_id_list = [tweet_id[i] for i in indexes]
 
+		# get together list of all tweets in the cluster including: well all of it.
+		cluster_tweet_list = [tweetlistmaster[i] for i in indexes]
+
+		for idx, item in enumerate(cluster_tweet_list):
+			item['vector_representation'] = subset_words[idx]
+
+
+		# store everything.
 		cluster_dict["tweet_ids"] = tweet_id_list
 		cluster_dict["tweetsize"] = len(tweet_id_list)
-
+		cluster_dict["userscounts"] = user_dict
+		cluster_dict["bagofwords"] = reduc_word
+		cluster_dict['tweet_data'] = cluster_tweet_list
+		# append to list
 		dict_list.append(cluster_dict)
 
 	full_info["Clusterlist"] = dict_list
