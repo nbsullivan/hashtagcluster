@@ -6,109 +6,17 @@ from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 import scipy
 from collections import Counter
+from tweetutils import clean_tweet
 
 
 
-def clean_tweet(tweet):
-	# input a tweet and get back a dictionary form of its relevant content.
-	# return tweet text, username, tweet_id, & geo-location (coordinates)
-	tweet_dict = {}
-	tweet_dict['text'] = tweet['text']
-	tweet_dict['screen_name'] = tweet['user']['screen_name']
-	tweet_dict['tweet_id'] = tweet['id']
-		
-	# return tweets with geo-location
-	if tweet['geo'] != None:
-		tweet_dict['geo'] = tweet['geo']['coordinates']
 
-	return tweet_dict
-
-def vectorize_tweets(tweetlist):
-	# vectorized tweetlist inputs and outputs a sparce matrix representation
-	vectorizer = CountVectorizer(min_df = 1)
-	vectorized_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-	names = vectorizer.get_feature_names()
-	return vectorized_tweets, names
-
-
-def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster = None, tweet_pred = None):
-	# we want to subset the vectorized tweets based on tweet_pred, also create a list of dictionarys with word counts per cluster
-	dict_list = []
-
-	# put everything into the full_info dict
-	full_info = {}
-
-	# extract users and tweet_ids from tweetmasterlist
-	userlist = [tweet["screen_name"] for tweet in tweetlistmaster]
-	tweet_id = [tweet['tweet_id'] for tweet in tweetlistmaster]
-
-
-	# loop over number of subsets
-	for k in range(n):
-
-		# prepare a dictionary for cluster information
-		cluster_dict = {}
-
-		# rows with label k.
-		indexes = [i for i, x in enumerate(tweet_pred) if x == k]
-		
-		# subset vectorized tweets
-		subset_words = vectorized_tweets[np.array(indexes)]
-
-		# sum the subset into  a single vector
-		total_vector = subset_words.sum(axis = 0)
-
-		# note .tolist will return a nested list
-		total_vector = total_vector.tolist()
-		total_vector = total_vector[0];
-
-		# convert the long to int for entries in total_vector
-		total_vector = map(int, total_vector)
-
-		# form dictionary of words.
-		word_dict = dict(zip(names, total_vector))
-
-		# reduce the size of the word dictionary
-		reduc_word = {k:v for k,v in word_dict.items() if v != 0}
-
-
-
-		# get unigue users and number of tweets from them.
-		cluster_users = [userlist[i] for i in indexes]
-		user_dict = dict(Counter(cluster_users))
-
-		# get tweet ids users and number of tweets from them.
-		tweet_id_list = [tweet_id[i] for i in indexes]
-
-		# get together list of all tweets in the cluster including: well all of it.
-		cluster_tweet_list = [tweetlistmaster[i] for i in indexes]
-
-		for idx, item in enumerate(cluster_tweet_list):
-			item['vector_representation'] = subset_words[idx]
-
-
-		# store everything.
-		cluster_dict["tweet_ids"] = tweet_id_list
-		cluster_dict["tweetsize"] = len(tweet_id_list)
-		cluster_dict["userscounts"] = user_dict
-		cluster_dict["bagofwords"] = reduc_word
-		cluster_dict['tweet_data'] = cluster_tweet_list
-		# append to list
-		dict_list.append(cluster_dict)
-
-	full_info["Clusterlist"] = dict_list
-	full_info["totaltweet"] = len(tweetlistmaster)
-
-
-	return full_info
-    
 
 
 class MyStreamListener(tweepy.StreamListener):
 	
 	# tweetlist stores 100 tweets, tweetlistmaster stores all imported tweets
 	tweetlist = []
-	tweetlistmaster = []
 	tweetcounter = 0
 	batchnumber = 0
 
@@ -126,7 +34,6 @@ class MyStreamListener(tweepy.StreamListener):
     	# clean the status, put in a list.
 		cleantweet = clean_tweet(status._json)
 		self.tweetlist.append(cleantweet)
-		self.tweetlistmaster.append(cleantweet)
 		self.tweetcounter += 1
 
 		print self.tweetcounter
@@ -138,7 +45,7 @@ class MyStreamListener(tweepy.StreamListener):
 			self.tweetcounter = 0
 
 			# dump to datafile for now
-			f = open('data/{0}_batch{1}.txt'.format(self.searchterm, str(self.batchnumber)), 'w')
+			f = open('data/current_data/{0}_batch{1}.txt'.format(self.searchterm, str(self.batchnumber)), 'w')
 			json.dump(self.tweetlist, f)
 			f.close()
 
@@ -147,31 +54,6 @@ class MyStreamListener(tweepy.StreamListener):
 
 			# increment batch couter.
 			self.batchnumber += 1
-
-			# vectorize master tweetlist list
-			vectorized_tweets, names = vectorize_tweets(self.tweetlistmaster)
-
-			# for now use n = 3 this to be replaced with silhouette analysis.
-			n = 3
-
-			# send vectorized tweets to clustering algorithm
-			clf = KMeans(n_clusters=n)
-			tweet_pred = clf.fit_predict(vectorized_tweets)
-
-			# create cluster_json list
-			cluster_json = clusterinfo(n = n, vectorized_tweets = vectorized_tweets, names = names, tweetlistmaster = self.tweetlistmaster, tweet_pred = tweet_pred)
-
-			# if you want to take a peak uncomment below.
-			# pp(cluster_json)
-
-
-			# UP NEXT: create happy json to send out for visualization
-
-			# UP LATER: Shillouette analysis sklearn 
-
-
-
-
 
 
 	
@@ -197,7 +79,7 @@ if __name__ == '__main__':
 	api = tweepy.API(auth)
 
 	# search term
-	hashTag = ''
+	hashTag = '#Brangelina'
 	print hashTag
 
 
