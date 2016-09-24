@@ -170,6 +170,31 @@ def cluster_to_port(clusterlist):
 
     return None
 
+def silhouette_analysis(vectorized_tweets):
+    # need code for silhouette analysis
+    sil_scr_prev = 0
+    brk = 0
+    for n in range(2,10):
+        # cluster
+        clf = KMeans(n_clusters=n)
+        tweet_pred = clf.fit_predict(vectorized_tweets)
+        # cluster silhouette scores
+        silhouette_avg = silhouette_score(vectorized_tweets, tweet_pred)
+        
+        # determine number of centroids to use for batch
+        if silhouette_avg <= sil_scr_prev:
+            sil_n = n - 1
+            sil_avg = sil_scr_prev
+            brk = 1
+        # break if previous silhoutte score is smaller
+        if brk == 1:
+            break
+        sil_scr_prev = silhouette_avg
+        sil_pred_prev = tweet_pred
+
+
+    return sil_n, sil_pred_prev
+
 # def main():
 #     predir = 'data/clean/'
 #     hashtag = 'HowtoConfuseaMillennial'
