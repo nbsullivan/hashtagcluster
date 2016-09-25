@@ -61,6 +61,12 @@ if __name__ == '__main__':
 			# write to file
 			counts_to_file(cluster_json, base, batchnumber = k)
 
+			f = open(base + '{0}.json'.format(k), 'w')
+			json.dump(cluster_json, f)
+			f.close()
+
+
+
 
 
 

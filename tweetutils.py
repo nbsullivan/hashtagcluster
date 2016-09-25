@@ -86,8 +86,8 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
         # get together list of all tweets in the cluster including: well all of it.
         cluster_tweet_list = [tweetlistmaster[i] for i in indexes]
 
-        for idx, item in enumerate(cluster_tweet_list):
-            item['vector_representation'] = subset_words[idx]
+        # for idx, item in enumerate(cluster_tweet_list):
+        #     item['vector_representation'] = subset_words[idx]
 
 
         # store everything.
