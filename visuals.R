@@ -18,7 +18,7 @@ for(fil in files){
     print(k)
     dfa <- subset(df, Cluster == k)
     print(quantile(dfa$Count, names = FALSE)[4])
-    dfa <- subset(dfa, Count >= quantile(Count, names = FALSE, c(.95)))
+    dfa <- subset(dfa, Count >= quantile(Count, names = FALSE, c(.75)))
     print(head(df))
     new_df <- rbind(new_df,dfa)
   }
@@ -37,10 +37,11 @@ for(fil in files){
     g <- ggplot(data = df, aes(Word, color = Cluster, fill = Cluster))
   }
   
-  g + geom_bar(aes(weight = Count), position = 'dodge') +
+  g + geom_bar(aes(weight = Count)) +
     ggtitle(fil) +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1, vjust = 1))
-  ggsave(paste(substr(fil, 1,nchar(fil)-4),'bar.jpg'), width=20, height=20)
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    facet_wrap(~Cluster, scales="free_x")
+  ggsave(paste(substr(fil, 1,nchar(fil)-4),'bar.pdf'))
   
 }
 

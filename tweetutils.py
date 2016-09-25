@@ -2,12 +2,14 @@
 import numpy as np
 import json
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics import silhouette_score
 from pprint import pprint as pp
 from sklearn.cluster import KMeans
 import numpy as np
 import scipy
 from collections import Counter
 import jsocket
+import pandas as pd
 
 
 def clean_tweet(tweet):
@@ -26,7 +28,7 @@ def clean_tweet(tweet):
 
 def vectorize_tweets(tweetlist):
     # vectorized tweetlist inputs and outputs a sparce matrix representation
-    vectorizer = CountVectorizer(min_df = 1)
+    vectorizer = CountVectorizer(min_df = 1, stop_words='english')
     vectorized_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     names = vectorizer.get_feature_names()
     return vectorized_tweets, names
@@ -151,30 +153,13 @@ def vectorize_file(in_files, out_file):
     json.dump(vect_tweets.toarray().tolist(), fpo)
     fpo.close()
 
-def silhouette_analysis(vectorized_tweets):
-    # to be updated with matt and karls method for determining number of clusters.
-
-    # for now use n = 3
-    n = 3
-
-    # send vectorized tweets to clustering algorithm
-    clf = KMeans(n_clusters=n)
-    tweet_pred = clf.fit_predict(vectorized_tweets)
-
-    return n,tweet_pred
-
-def cluster_to_port(clusterlist):
-    # eventaully send cluster lists to a local port
-
-    
-
-    return None
 
 def silhouette_analysis(vectorized_tweets):
     # need code for silhouette analysis
     sil_scr_prev = 0
     brk = 0
     for n in range(2,10):
+        print 'testing ', n, ' clusters'
         # cluster
         clf = KMeans(n_clusters=n)
         tweet_pred = clf.fit_predict(vectorized_tweets)
@@ -192,8 +177,57 @@ def silhouette_analysis(vectorized_tweets):
         sil_scr_prev = silhouette_avg
         sil_pred_prev = tweet_pred
 
+    if sil_n == None:
+        sil_n = 10
+
 
     return sil_n, sil_pred_prev
+
+def counts_to_file(cluster_json, base, batchnumber):
+    # for a cluster_json write it to a csv file, for analysis
+
+    # get lists of words and users
+    word_list = []
+    user_list = []
+
+    # loop over the clusters
+    for j in range(len(cluster_json['Clusterlist'])):
+
+        # each instance of word or user is saved with a count and the cluster that it is part of
+        word_row = {}
+        user_row = {}
+        
+        # set up a word row
+        for key in cluster_json['Clusterlist'][j]['bagofwords']:
+
+            word_row["Cluster"] = j
+            word_row["Word"] = key
+            word_row["Count"] = cluster_json['Clusterlist'][j]['bagofwords'][key]
+
+            word_list.append(word_row)
+
+            word_row = {}
+        
+        for key in cluster_json['Clusterlist'][j]['userscounts']:
+           
+            user_row["Cluster"] = j
+            user_row["User"] = key
+            user_row["Count"] = cluster_json['Clusterlist'][j]['userscounts'][key]
+
+            user_list.append(user_row)
+
+            user_row = {}
+
+    # put into  df for easy writing.
+    user_df = pd.DataFrame(user_list)
+    words_df = pd.DataFrame(word_list)
+
+    # write to file
+    user_df.to_csv(base + '{0}usercount.csv'.format(batchnumber), encoding='utf-8')
+    words_df.to_csv(base + '{0}wordcount.csv'.format(batchnumber), encoding='utf-8')
+
+    print user_df.head()
+    print words_df.head()
 
 # def main():
 #     predir = 'data/clean/'

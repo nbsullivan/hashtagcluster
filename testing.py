@@ -5,6 +5,8 @@ from pprint import pprint as pp
 from tweetutils import clean_tweet
 from tweetutils import vectorize_tweets
 from tweetutils import clusterinfo
+from tweetutils import counts_to_file
+from tweetutils import silhouette_analysis
 from sklearn.cluster import KMeans
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
@@ -12,47 +14,6 @@ import scipy
 from collections import Counter
 import pandas as pd
 
-def counts_to_file(cluster_json, base, batchnumber):
-	# for a cluster_json write it to a csv file, for analysis
-
-	word_list = []
-	user_list = []
-	for j in range(len(cluster_json['Clusterlist'])):
-		print j
-		word_row = {}
-		user_row = {}
-		
-
-		for key in cluster_json['Clusterlist'][j]['bagofwords']:
-			# print key
-			word_row["Cluster"] = j
-			word_row["Word"] = key
-			word_row["Count"] = cluster_json['Clusterlist'][j]['bagofwords'][key]
-
-			word_list.append(word_row)
-
-			word_row = {}
-
-		for key in cluster_json['Clusterlist'][j]['userscounts']:
-			# print key
-			user_row["Cluster"] = j
-			user_row["User"] = key
-			user_row["Count"] = cluster_json['Clusterlist'][j]['userscounts'][key]
-
-			user_list.append(user_row)
-
-			user_row = {}
-
-	# put into  df for easy writing.
-	user_df = pd.DataFrame(user_list)
-	words_df = pd.DataFrame(word_list)
-
-	# write to file
-	user_df.to_csv(base + '{0}usercount.csv'.format(k), encoding='utf-8')
-	words_df.to_csv(base + '{0}wordcount.csv'.format(k), encoding='utf-8')
-
-	print user_df.head()
-	print words_df.head()
 
 
 
@@ -91,16 +52,13 @@ if __name__ == '__main__':
 			# vectorize
 			vectorized_tweets, names = vectorize_tweets(tweetlistmaster)
 
-			# need code for silhouette analysis
-			n = 3
-			# cluster
-			clf = KMeans(n_clusters=n)
-			tweet_pred = clf.fit_predict(vectorized_tweets)
+			# do silhouette analysis on master list
+			n, tweet_pred = silhouette_analysis(vectorized_tweets)
 
-			# we want to subset the vectorized tweets based on tweet_pred, also create a list of dictionarys with word counts per cluster
-			
+			# create cluter information on master list
 			cluster_json = clusterinfo(n = n, vectorized_tweets = vectorized_tweets, names = names, tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
-			
+
+			# write to file
 			counts_to_file(cluster_json, base, batchnumber = k)
 
 
