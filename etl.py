@@ -36,9 +36,10 @@ class MyStreamListener(tweepy.StreamListener):
 		self.tweetlist.append(cleantweet)
 		self.tweetcounter += 1
 
-		print self.tweetcounter
+		
 
 		if self.tweetcounter >= 100:
+			print self.searchterm, ' batch number ', self.batchnumber
 			# once 100 tweeets have been reached we do something. currently we write it to file, extract features, cluster and generate cluster information.
 
 			# reset the counters
@@ -79,7 +80,7 @@ if __name__ == '__main__':
 	api = tweepy.API(auth)
 
 	# search term
-	hashTag = '#Brangelina'
+	hashTag = '#debatenight'
 	print hashTag
 
 

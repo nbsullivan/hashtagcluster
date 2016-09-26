@@ -19,6 +19,8 @@ def clean_tweet(tweet):
     tweet_dict['text'] = tweet['text']
     tweet_dict['screen_name'] = tweet['user']['screen_name']
     tweet_dict['tweet_id'] = tweet['id']
+    tweet_dict['timestamp'] = int(tweet['timestamp_ms'])
+
         
     # return tweets with geo-location
     if tweet['geo'] != None:
@@ -207,7 +209,7 @@ def counts_to_file(cluster_json, base, batchnumber):
             word_list.append(word_row)
 
             word_row = {}
-        
+
         for key in cluster_json['Clusterlist'][j]['userscounts']:
            
             user_row["Cluster"] = j
