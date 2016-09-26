@@ -13,15 +13,15 @@ import pandas as pd
 
 
 def clean_tweet(tweet):
-    # input a tweet and get back a dictionary form of its relevant content.
-    # return tweet text, username, tweet_id, & geo-location (coordinates)
+    """input a tweet and get back a dictionary form of its relevant content.
+    return tweet text, username, tweet_id, & geo-location (coordinates)"""
     tweet_dict = {}
     tweet_dict['text'] = tweet['text']
     tweet_dict['screen_name'] = tweet['user']['screen_name']
     tweet_dict['tweet_id'] = tweet['id']
     tweet_dict['timestamp'] = int(tweet['timestamp_ms'])
 
-        
+
     # return tweets with geo-location
     if tweet['geo'] != None:
         tweet_dict['geo'] = tweet['geo']['coordinates']
@@ -29,7 +29,7 @@ def clean_tweet(tweet):
     return tweet_dict
 
 def vectorize_tweets(tweetlist):
-    # vectorized tweetlist inputs and outputs a sparce matrix representation
+    """vectorized tweetlist inputs and outputs a sparce matrix representation"""
     vectorizer = CountVectorizer(min_df = 1, stop_words='english')
     vectorized_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     names = vectorizer.get_feature_names()
@@ -37,7 +37,8 @@ def vectorize_tweets(tweetlist):
 
 
 def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster = None, tweet_pred = None):
-    # we want to subset the vectorized tweets based on tweet_pred, also create a list of dictionarys with word counts per cluster
+    """we want to subset the vectorized tweets based on tweet_pred
+    also create a list of dictionarys with word counts per cluster"""
     dict_list = []
 
     # put everything into the full_info dict
@@ -56,7 +57,7 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 
         # rows with label k.
         indexes = [i for i, x in enumerate(tweet_pred) if x == k]
-        
+
         # subset vectorized tweets
         subset_words = vectorized_tweets[np.array(indexes)]
 
@@ -144,7 +145,7 @@ def vectorize_file(in_files, out_file):
         tweetf = json.load(fpi)
         fpi.close()
         tweets = tweets + map(lambda tweet: tweet['text'], tweetf)
-    
+
     print tweets
 
 
@@ -167,7 +168,7 @@ def silhouette_analysis(vectorized_tweets):
         tweet_pred = clf.fit_predict(vectorized_tweets)
         # cluster silhouette scores
         silhouette_avg = silhouette_score(vectorized_tweets, tweet_pred)
-        
+
         # determine number of centroids to use for batch
         if silhouette_avg <= sil_scr_prev:
             sil_n = n - 1
@@ -186,7 +187,7 @@ def silhouette_analysis(vectorized_tweets):
     return sil_n, sil_pred_prev
 
 def counts_to_file(cluster_json, base, batchnumber):
-    # for a cluster_json write it to a csv file, for analysis
+    """for a cluster_json write it to a csv file, for analysis"""
 
     # get lists of words and users
     word_list = []
@@ -198,7 +199,7 @@ def counts_to_file(cluster_json, base, batchnumber):
         # each instance of word or user is saved with a count and the cluster that it is part of
         word_row = {}
         user_row = {}
-        
+
         # set up a word row
         for key in cluster_json['Clusterlist'][j]['bagofwords']:
 
@@ -211,7 +212,7 @@ def counts_to_file(cluster_json, base, batchnumber):
             word_row = {}
 
         for key in cluster_json['Clusterlist'][j]['userscounts']:
-           
+
             user_row["Cluster"] = j
             user_row["User"] = key
             user_row["Count"] = cluster_json['Clusterlist'][j]['userscounts'][key]
@@ -237,12 +238,10 @@ def counts_to_file(cluster_json, base, batchnumber):
 #     pre = predir + hashtag + '_batch'
 #     post = '.txt'
 #     infs = []
-    
+
 #     for k in xrange(0, 10 + 1):
 #         filepath = pre + str(k) + post
 #         infs = infs + [filepath]
-    
+
 #     outf = 'data/vectorized/HowtoConfuseaMillennial.json'
 #     vectorize_file(infs, outf)
-
-
