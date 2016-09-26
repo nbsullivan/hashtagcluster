@@ -149,7 +149,7 @@ def vectorize_file(in_files, out_file):
     print tweets
 
 
-    vectorizer = CountVectorizer(min_df = 1)
+    vectorizer = CountVectorizer(min_df = 1, stop_words = 'english')
     vect_tweets = vectorizer.fit_transform(tweets)
 
     fpo = open(out_file, 'w')
