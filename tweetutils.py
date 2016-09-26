@@ -29,7 +29,7 @@ def clean_tweet(tweet):
     return tweet_dict
 
 def vectorize_tweets(tweetlist):
-    """vectorized tweetlist inputs and outputs a sparce matrix representation"""
+    """vectorized tweetlist inputs and outputs a sparse matrix representation"""
     vectorizer = CountVectorizer(min_df = 1, stop_words='english')
     vectorized_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     names = vectorizer.get_feature_names()
@@ -38,7 +38,7 @@ def vectorize_tweets(tweetlist):
 
 def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster = None, tweet_pred = None):
     """we want to subset the vectorized tweets based on tweet_pred
-    also create a list of dictionarys with word counts per cluster"""
+    also create a list of dictionaries with word counts per cluster"""
     dict_list = []
 
     # put everything into the full_info dict
