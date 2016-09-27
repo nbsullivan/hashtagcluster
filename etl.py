@@ -14,29 +14,29 @@ from tweetutils import clean_tweet
 
 
 class MyStreamListener(tweepy.StreamListener):
-	
+
 	# tweetlist stores 100 tweets, tweetlistmaster stores all imported tweets
 	tweetlist = []
 	tweetcounter = 0
 	batchnumber = 0
 
 	def __init__(self, api=None, searchitem = None):
-		# over ride the base _init_ method to accept a serach term parameter
+		"""over ride the base _init_ method to accept a serach term parameter"""
 
 		self.api = api
 		self.searchterm = searchitem
 
 
 	def on_status(self, status):
-    	# we want to grab tweets in batches of 100 to send to the clustering algo, or maybe less than 100 or maybe more
-    	# also at this stage we want to have something to process the tweets.
+    	"""we want to grab tweets in batches of 100 to send to the clustering algo, or maybe less than 100 or maybe more
+    	also at this stage we want to have something to process the tweets."""
 
     	# clean the status, put in a list.
 		cleantweet = clean_tweet(status._json)
 		self.tweetlist.append(cleantweet)
 		self.tweetcounter += 1
 
-		
+
 
 		if self.tweetcounter >= 100:
 			print self.searchterm, ' batch number ', self.batchnumber
@@ -57,7 +57,7 @@ class MyStreamListener(tweepy.StreamListener):
 			self.batchnumber += 1
 
 
-	
+
 
 
 
