@@ -10,6 +10,8 @@ import scipy
 from collections import Counter
 import jsocket
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction import FeatureHasher
 
 
 def clean_tweet(tweet):
@@ -227,6 +229,23 @@ def counts_to_file(cluster_json, base, batchnumber):
 
     print user_df.head()
     print words_df.head()
+
+
+def tf_idf_tweets(tweetlist):
+    """use tf_idf tweetlist inputs and outputs a sparse matrix representation"""
+    tfidfer = TfidfVectorizer(stop_words='english')
+    tfidf_tweet = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    return tfidf_tweet
+
+
+def hash_tweets(tweetlist):
+    """hash tweetlist inputs and outputs a sparse matrix representation"""
+    hasher = FeatureHasher(input_type = "string")
+    hashed_tweets = hasher.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    return hashed_tweets
+
+
+
 
 # def main():
 #     predir = 'data/clean/'

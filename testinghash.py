@@ -7,19 +7,13 @@ from tweetutils import vectorize_tweets
 from tweetutils import clusterinfo
 from tweetutils import counts_to_file
 from tweetutils import silhouette_analysis
-from sklearn.cluster import KMeans
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction import FeatureHasher
+from tweetutils import hash_tweets
 import numpy as np
 import scipy
 from collections import Counter
 import pandas as pd
 
-def hash_tweets(tweetlist):
-    """hash tweetlist inputs and outputs a sparse matrix representation"""
-    hasher = FeatureHasher(input_type = "string")
-    hashed_tweets = hasher.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-    return hashed_tweets
+
 
 
 

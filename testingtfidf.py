@@ -7,20 +7,11 @@ from tweetutils import vectorize_tweets
 from tweetutils import clusterinfo
 from tweetutils import counts_to_file
 from tweetutils import silhouette_analysis
-from sklearn.cluster import KMeans
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_extraction.text import TfidfVectorizer
+from tweetutils import tf_idf_tweets
 import numpy as np
 import scipy
 from collections import Counter
 import pandas as pd
-
-def tf_idf_tweets(tweetlist):
-    """use tf_idf tweetlist inputs and outputs a sparse matrix representation"""
-    tfidfer = TfidfVectorizer(stop_words='english')
-    tfidf_tweet = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-    return tfidf_tweet
-
 
 
 
