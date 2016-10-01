@@ -156,7 +156,7 @@ def silhouette_analysis(vectorized_tweets):
     # need code for silhouette analysis
     sil_scr_prev = 0
     brk = 0
-    for n in range(2,10):
+    for n in range(2,20):
         print 'testing ', n, ' clusters'
         # cluster
         clf = MiniBatchKMeans(n_clusters=n)
