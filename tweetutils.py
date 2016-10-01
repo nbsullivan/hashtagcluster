@@ -11,6 +11,13 @@ from collections import Counter
 import jsocket
 import pandas as pd
 
+def tweet_counter(tweet_text):
+    # input tweet text and output dictionary with keys being tweet text and value being 
+    # a cout of occurances of tweet text
+    tweet_freq = [tweet_text.count(i) for i in tweet_text]
+    tweet_count = dict(zip(tweet_text, tweet_freq))
+
+    return tweet_count
 
 def clean_tweet(tweet):
     """input a tweet and get back a dictionary form of its relevant content.
@@ -47,6 +54,7 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
     # extract users and tweet_ids from tweetmasterlist
     userlist = [tweet["screen_name"] for tweet in tweetlistmaster]
     tweet_id = [tweet['tweet_id'] for tweet in tweetlistmaster]
+    tweet_text = [tweet["text"] for tweet in tweetlistmaster]
 
 
     # loop over number of subsets
