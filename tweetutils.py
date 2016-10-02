@@ -13,6 +13,14 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction import FeatureHasher
 
+def tweet_counter(tweet_text):
+    # input tweet text and output dictionary with keys being tweet text and value being 
+    # a cout of occurances of tweet text
+    tweet_freq = [tweet_text.count(i) for i in tweet_text]
+    tweet_count = dict(zip(tweet_text, tweet_freq))
+
+    return tweet_count
+
 
 def clean_tweet(tweet):
     """input a tweet and get back a dictionary form of its relevant content.
