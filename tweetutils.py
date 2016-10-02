@@ -56,68 +56,8 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
 
     tweet_df['cluster_pred'] = tweet_pred
 
-<<<<<<< HEAD
     return tweet_df
-=======
-    # extract users and tweet_ids from tweetmasterlist
-    userlist = [tweet["screen_name"] for tweet in tweetlistmaster]
-    tweet_id = [tweet['tweet_id'] for tweet in tweetlistmaster]
-    tweet_text = [tweet['text'] for tweet in tweetlistmaster]
 
-    # switch to np array for tweet texts
-    nptweets = np.array(tweet_text)
-
-
-    # loop over number of clusters
-    for k in range(n):
-        # prepare a dictionary for cluster information
-        cluster_dict = {}
-
-        # rows with label k.
-        indexes = [i for i, x in enumerate(tweet_pred) if x == k]
-
-        # extract tweet_texts for this cluster
-        subset_tweets = nptweets[indexes]
-
-        # join together tweets from list
-        tweet_string = ' '.join(subset_tweets).split()
-
-        # get counts of words
-        word_count = [tweet_string.count(i) for i in tweet_string]
-
-        # make into dict
-        word_count_dict = dict(zip(tweet_string, word_count))
-
-
-        # get unigue users and number of tweets from them.
-        cluster_users = [userlist[i] for i in indexes]
-        user_dict = dict(Counter(cluster_users))
-
-        # get tweet ids users and number of tweets from them.
-        tweet_id_list = [tweet_id[i] for i in indexes]
-
-        # get together list of all tweets in the cluster including: well all of it.
-        cluster_tweet_list = [tweetlistmaster[i] for i in indexes]
-
-        # for idx, item in enumerate(cluster_tweet_list):
-        #     item['vector_representation'] = subset_words[idx]
-
-
-        # store everything.
-        cluster_dict["tweet_ids"] = tweet_id_list
-        cluster_dict["tweetsize"] = len(tweet_id_list)
-        cluster_dict["userscounts"] = user_dict
-        cluster_dict["bagofwords"] = word_count_dict
-        cluster_dict['tweet_data'] = cluster_tweet_list
-        # append to list
-        dict_list.append(cluster_dict)
-
-    full_info["Clusterlist"] = dict_list
-    full_info["totaltweet"] = len(tweetlistmaster)
-
-
-    return full_info
->>>>>>> master
 
 
 # def clean_tweet(tweet):
