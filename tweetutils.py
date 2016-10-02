@@ -256,7 +256,7 @@ def hash_tweets(tweetlist):
     hashed_tweets = hasher.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     return hashed_tweets
 
-def tf_idf_lsa_tweets(tweetlist, n_dim = 1000):
+def tf_idf_lsa_tweets(tweetlist, n_dim = 5000):
     """Perform TF-IDF vectorization and then reduce the dimension using truncated
     SVD and normalize to the Euclidean unit ball.
 
@@ -267,6 +267,17 @@ def tf_idf_lsa_tweets(tweetlist, n_dim = 1000):
     tfidfer = TfidfVectorizer(stop_words = 'english')
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     tfidf_tweets = lsa.fit_transform(tfidf_tweets)
+
+    return tfidf_tweets
+
+def tf_idf_pca_tweets(tweetlist, n_dim = 5000):
+    """Like tf_idf_lsa_tweets(), but uses PCA instead of TruncatedSVD."""
+    mypca = PCA(n_components = n_dim)
+    normalizer = Normalizer(copy = False)
+    reducer = make_pipeline(mypca, normalizer)
+    tfidfer = TfidfVectorizer(stop_words = 'english')
+    tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    tfidf_tweets = reducer.fit_transform(tfidf_tweets)
 
     return tfidf_tweets
 
