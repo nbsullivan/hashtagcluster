@@ -25,14 +25,14 @@ if __name__ == '__main__':
 
 
 	# this will grab the file name where data is stored
-	for k in range(0,24):
+	for k in range(0,820):
 
-		base = 'data/millennial/HowtoConfuseaMillennial_batch'
+		base = 'data/brangelia/#Brangelina_batch'
 
 		fil = base + '{0}.txt'.format(k)
 
 		# only use millennial data
-		if "HowtoConfuseaMillennial" in fil:
+		if "Brangelina" in fil:
 			print fil
 
 			# open and load the file
@@ -51,15 +51,16 @@ if __name__ == '__main__':
 			# do silhouette analysis on master list
 			n, tweet_pred = silhouette_analysis(hashed_tweets)
 
+
 			# create cluter information on master list
-			cluster_json = clusterinfo(n = n, vectorized_tweets = hashed_tweets, tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
+			cluster_df = clusterinfo(n = n, vectorized_tweets = hashed_tweets, tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
 
 			# write to file
-			counts_to_file(cluster_json, base, batchnumber = k)
+			counts_to_file(cluster_df=cluster_df, base = base, batchnumber = k, n = n)
 
-			f = open(base + '{0}.json'.format(k), 'w')
-			json.dump(cluster_json, f)
-			f.close()
+			# write cluster_df to file
+			cluster_df.to_csv(base + 'pred'+ '{0}.csv'.format(k), encoding='utf-8')
+
 
 
 
