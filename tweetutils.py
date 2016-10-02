@@ -4,12 +4,14 @@ import json
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics import silhouette_score
 from pprint import pprint as pp
-from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans
 import numpy as np
 import scipy
 from collections import Counter
 import jsocket
 import pandas as pd
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction import FeatureHasher
 
 
 def clean_tweet(tweet):
@@ -47,38 +49,33 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
     # extract users and tweet_ids from tweetmasterlist
     userlist = [tweet["screen_name"] for tweet in tweetlistmaster]
     tweet_id = [tweet['tweet_id'] for tweet in tweetlistmaster]
+    tweet_text = [tweet['text'] for tweet in tweetlistmaster]
+
+    # switch to np array for tweet texts
+    nptweets = np.array(tweet_text)
 
 
-    # loop over number of subsets
+    # loop over number of clusters
     for k in range(n):
-
         # prepare a dictionary for cluster information
         cluster_dict = {}
 
         # rows with label k.
         indexes = [i for i, x in enumerate(tweet_pred) if x == k]
 
-        # subset vectorized tweets
-        subset_words = vectorized_tweets[np.array(indexes)]
+        # extract tweet_texts for this cluster
+        subset_tweets = nptweets[indexes]
 
-        # sum the subset into  a single vector
-        total_vector = subset_words.sum(axis = 0)
+        # join together tweets from list
+        tweet_string = ' '.join(subset_tweets).split()
 
-        # note .tolist will return a nested list
-        total_vector = total_vector.tolist()
-        total_vector = total_vector[0];
+        # get counts of words
+        word_count = [tweet_string.count(i) for i in tweet_string]
 
-        # convert the long to int for entries in total_vector
-        total_vector = map(int, total_vector)
+        # make into dict
+        word_count_dict = dict(zip(tweet_string, word_count))
 
-        # form dictionary of words.
-        word_dict = dict(zip(names, total_vector))
-
-        # reduce the size of the word dictionary
-        reduc_word = {k:v for k,v in word_dict.items() if v != 0}
-
-
-
+    
         # get unigue users and number of tweets from them.
         cluster_users = [userlist[i] for i in indexes]
         user_dict = dict(Counter(cluster_users))
@@ -97,7 +94,7 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
         cluster_dict["tweet_ids"] = tweet_id_list
         cluster_dict["tweetsize"] = len(tweet_id_list)
         cluster_dict["userscounts"] = user_dict
-        cluster_dict["bagofwords"] = reduc_word
+        cluster_dict["bagofwords"] = word_count_dict
         cluster_dict['tweet_data'] = cluster_tweet_list
         # append to list
         dict_list.append(cluster_dict)
@@ -161,13 +158,14 @@ def silhouette_analysis(vectorized_tweets):
     # need code for silhouette analysis
     sil_scr_prev = 0
     brk = 0
-    for n in range(2,10):
+    for n in range(2,20):
         print 'testing ', n, ' clusters'
         # cluster
-        clf = KMeans(n_clusters=n)
+        clf = MiniBatchKMeans(n_clusters=n)
         tweet_pred = clf.fit_predict(vectorized_tweets)
         # cluster silhouette scores
         silhouette_avg = silhouette_score(vectorized_tweets, tweet_pred)
+        print 'Silhouette average ', silhouette_avg
 
         # determine number of centroids to use for batch
         if silhouette_avg <= sil_scr_prev:
@@ -231,6 +229,23 @@ def counts_to_file(cluster_json, base, batchnumber):
 
     print user_df.head()
     print words_df.head()
+
+
+def tf_idf_tweets(tweetlist):
+    """use tf_idf tweetlist inputs and outputs a sparse matrix representation"""
+    tfidfer = TfidfVectorizer(stop_words='english')
+    tfidf_tweet = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    return tfidf_tweet
+
+
+def hash_tweets(tweetlist):
+    """hash tweetlist inputs and outputs a sparse matrix representation"""
+    hasher = FeatureHasher(input_type = "string")
+    hashed_tweets = hasher.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    return hashed_tweets
+
+
+
 
 # def main():
 #     predir = 'data/clean/'
