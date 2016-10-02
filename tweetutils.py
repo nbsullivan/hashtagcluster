@@ -2,6 +2,12 @@
 import numpy as np
 import json
 from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.feature_extraction import FeatureHasher
+from sklearn.decomposition import TruncatedSVD
+from sklearn.decomposition import PCA
+from sklearn.preporcessing import Normalizer
+from sklearn.pipeline import make_pipeline
 from sklearn.metrics import silhouette_score
 from pprint import pprint as pp
 from sklearn.cluster import MiniBatchKMeans
@@ -10,11 +16,9 @@ import scipy
 from collections import Counter
 import jsocket
 import pandas as pd
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction import FeatureHasher
 
 def tweet_counter(tweet_text):
-    # input tweet text and output dictionary with keys being tweet text and value being 
+    # input tweet text and output dictionary with keys being tweet text and value being
     # a cout of occurances of tweet text
     tweet_freq = [tweet_text.count(i) for i in tweet_text]
     tweet_count = dict(zip(tweet_text, tweet_freq))
@@ -38,7 +42,7 @@ def clean_tweet(tweet):
 
     return tweet_dict
 
-def vectorize_tweets(tweetlist):
+def vectorize_tweets(tweetlist, n_dimensions = None):
     """vectorized tweetlist inputs and outputs a sparse matrix representation"""
     vectorizer = CountVectorizer(min_df = 1, stop_words='english')
     vectorized_tweets = vectorizer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
@@ -83,7 +87,7 @@ def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster =
         # make into dict
         word_count_dict = dict(zip(tweet_string, word_count))
 
-    
+
         # get unigue users and number of tweets from them.
         cluster_users = [userlist[i] for i in indexes]
         user_dict = dict(Counter(cluster_users))
@@ -252,6 +256,19 @@ def hash_tweets(tweetlist):
     hashed_tweets = hasher.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     return hashed_tweets
 
+def tf_idf_lsa_tweets(tweetlist, n_dim = 1000):
+    """Perform TF-IDF vectorization and then reduce the dimension using truncated
+    SVD and normalize to the Euclidean unit ball.
+
+    See http://scikit-learn.org/stable/auto_examples/text/document_clustering.html#sphx-glr-auto-examples-text-document-clustering-py"""
+    svd = TruncatedSVD(n_dim)
+    normalizer = Normalizer(copy = False)
+    lsa = make_pipeline(svd, normalizer)
+    tfidfer = TfidfVectorizer(stop_words = 'english')
+    tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    tfidf_tweets = lsa.fit_transform(tfidf_tweets)
+
+    return tfidf_tweets
 
 
 
