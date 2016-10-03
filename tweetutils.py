@@ -13,6 +13,7 @@ from pprint import pprint as pp
 from sklearn.cluster import MiniBatchKMeans
 import numpy as np
 import scipy
+from scipy import sparse
 from collections import Counter
 import jsocket
 import pandas as pd
@@ -266,9 +267,9 @@ def tf_idf_lsa_tweets(tweetlist, n_dim = 200):
     lsa = make_pipeline(svd, normalizer)
     tfidfer = TfidfVectorizer(stop_words = 'english')
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-    tfidf_tweets = lsa.fit_transform(tfidf_tweets)
+    tfidf_tweets = lsa.fit_transform(tfidf_tweets.toarray)
 
-    return tfidf_tweets
+    return sparse.csr_matrix(tfidf_tweets)
 
 def tf_idf_pca_tweets(tweetlist, n_dim = 200):
     """Like tf_idf_lsa_tweets(), but uses PCA instead of TruncatedSVD."""
@@ -279,7 +280,7 @@ def tf_idf_pca_tweets(tweetlist, n_dim = 200):
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     tfidf_tweets = reducer.fit_transform(tfidf_tweets.toarray())
 
-    return tfidf_tweets
+    return sparse.csr_matrix(tfidf_tweets)
 
 
 
