@@ -6,7 +6,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction import FeatureHasher
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import PCA
-from sklearn.preporcessing import Normalizer
+from sklearn.preprocessing import Normalizer
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import silhouette_score
 from pprint import pprint as pp
@@ -208,9 +208,9 @@ def tf_idf_lsa_tweets(tweetlist, n_dim = 200):
     lsa = make_pipeline(svd, normalizer)
     tfidfer = TfidfVectorizer(stop_words = 'english')
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-    tfidf_tweets = lsa.fit_transform(tfidf_tweets.toarray())
+    tfidf_tweets = lsa.fit_transform(tfidf_tweets)
 
-    return sparse.csr_matrix(tfidf_tweets)
+    return tfidf_tweets
 
 def tf_idf_pca_tweets(tweetlist, n_dim = 200):
     """Like tf_idf_lsa_tweets(), but uses PCA instead of TruncatedSVD."""
