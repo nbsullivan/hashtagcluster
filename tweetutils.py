@@ -148,7 +148,7 @@ def counts_to_file(cluster_df, base, batchnumber, n):
 
 
     for k in range(0,n):
-        
+
         # subset dataframe to a single cluster.
         subset_df = cluster_df[cluster_df['cluster_pred'] == k]
 
@@ -208,7 +208,7 @@ def tf_idf_lsa_tweets(tweetlist, n_dim = 200):
     lsa = make_pipeline(svd, normalizer)
     tfidfer = TfidfVectorizer(stop_words = 'english')
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
-    tfidf_tweets = lsa.fit_transform(tfidf_tweets.toarray)
+    tfidf_tweets = lsa.fit_transform(tfidf_tweets.toarray())
 
     return sparse.csr_matrix(tfidf_tweets)
 
