@@ -22,29 +22,7 @@ import operator
 from operator import itemgetter
 
 
-def RT_removal(tweetlistmaster):
-	#
-	RT_filter = []
-	for n in tweetlistmaster:
 
-		if n['text'][0:3] != 'RT ':
-			RT_filter.append(n)
-
-	return RT_filter
-
-
-def RT_condensor(tweetlistmaster):
-	#
-	RT_filter = []
-	for n in tweetlistmaster:
-
-		if n['text'][0:3] == 'RT ':
-			RT_filter.append(n)
-
-		dd = dict((tweet["text"], tweet) for tweet in RT_filter).values()
-
-
-	return dd
 
 if __name__ == '__main__':
 	# testing play ground, is set up to work on the #howtoconfuseamillennial dataset.
@@ -77,7 +55,6 @@ if __name__ == '__main__':
 			tweet_freq = [tweet_text.count(i) for i in tweet_text]
 			tweet_count = dict(zip(tweet_text, tweet_freq))
 
-			tweet_tweet = RT_removal(tweetlistmaster)
 			retweet_list = RT_condensor(tweetlistmaster)
 
 			#pprint(tweet_tweet)

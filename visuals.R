@@ -1,6 +1,6 @@
 
 # change working directory to your data file path.
-setwd('/Users/nick/Documents/math503/project1/hashtagcluster/data/brangelia')
+setwd('/Users/nick/Documents/math503/project1/hashtagcluster/data/millennial')
 library(ggplot2)
 library(wordcloud2)
 
@@ -52,6 +52,7 @@ for(fil in files){
     
     # form bar chart of counts
     g + geom_bar(aes(weight = Count)) +
+      xlab('Frequency Within Cluster') +
       ggtitle(substr(fil, 1,nchar(fil)-4)) +
       theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
       facet_wrap(~Cluster, scales="free_x")

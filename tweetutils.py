@@ -51,7 +51,7 @@ def vectorize_tweets(tweetlist, n_dimensions = None):
     return vectorized_tweets, names
 
 
-def clusterinfo(n = 2, vectorized_tweets = None, names = None, tweetlistmaster = None, tweet_pred = None):
+def clusterinfo(tweetlistmaster = None, tweet_pred = None):
     """append tweet_pred to tweetmasterlist and return the dataframe"""
     tweet_df = pd.DataFrame(tweetlistmaster)
 
@@ -109,14 +109,14 @@ def vectorize_file(in_files, out_file):
     fpo.close()
 
 
-def silhouette_analysis(vectorized_tweets):
+def silhouette_analysis(vectorized_tweets, max_n = 20):
     # need code for silhouette analysis
     sil_scr_prev = 0
     brk = 0
-    for n in range(2,20):
+    for n in range(2,max_n):
         print 'testing ', n, ' clusters'
         # cluster
-        clf = MiniBatchKMeans(n_clusters=n, )
+        clf = MiniBatchKMeans(n_clusters=n)
         tweet_pred = clf.fit_predict(vectorized_tweets)
         # cluster silhouette scores
         silhouette_avg = silhouette_score(vectorized_tweets, tweet_pred)
@@ -133,21 +133,19 @@ def silhouette_analysis(vectorized_tweets):
         sil_scr_prev = silhouette_avg
         sil_pred_prev = tweet_pred
 
-    if sil_n == None:
-        sil_n = 10
 
+    return sil_pred_prev
 
-    return sil_n, sil_pred_prev
-
-def counts_to_file(cluster_df, base, batchnumber, n):
+def counts_to_file(cluster_df, base, batchnumber):
     """for a cluster_json write it to a csv file, for analysis"""
 
     # initializing lists to store dictionary rows
     word_list = []
     user_list = []
 
+    n_clusters = max(cluster_df['cluster_pred'].unique()) + 1
 
-    for k in range(0,n):
+    for k in range(0,n_clusters):
 
         # subset dataframe to a single cluster.
         subset_df = cluster_df[cluster_df['cluster_pred'] == k]
@@ -222,6 +220,30 @@ def tf_idf_pca_tweets(tweetlist, n_dim = 200):
     tfidf_tweets = reducer.fit_transform(tfidf_tweets.toarray())
 
     return sparse.csr_matrix(tfidf_tweets)
+
+def RT_removal(tweetlistmaster):
+    #
+    RT_filter = []
+    for n in tweetlistmaster:
+
+        if n['text'][0:3] != 'RT ':
+            RT_filter.append(n)
+
+    return RT_filter
+
+
+def RT_condensor(tweetlistmaster):
+    #
+    RT_filter = []
+    for n in tweetlistmaster:
+
+        if n['text'][0:3] == 'RT ':
+            RT_filter.append(n)
+
+        dd = dict((tweet["text"], tweet) for tweet in RT_filter).values()
+
+
+    return dd
 
 
 
