@@ -28,10 +28,10 @@ class MyStreamListener(tweepy.StreamListener):
 
 
 	def on_status(self, status):
-    	"""we want to grab tweets in batches of 100 to send to the clustering algo, or maybe less than 100 or maybe more
-    	also at this stage we want to have something to process the tweets."""
+		"""we want to grab tweets in batches of 100 to send to the clustering algo, or maybe less than 100 or maybe more
+		also at this stage we want to have something to process the tweets."""
 
-    	# clean the status, put in a list.
+		# clean the status, put in a list.
 		cleantweet = clean_tweet(status._json)
 		self.tweetlist.append(cleantweet)
 		self.tweetcounter += 1
@@ -80,7 +80,7 @@ if __name__ == '__main__':
 	api = tweepy.API(auth)
 
 	# search term
-	hashTag = '#debatenight'
+	hashTag = '#NationalBoyfriendDay'
 	print hashTag
 
 

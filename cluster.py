@@ -1,16 +1,13 @@
 import json
 import glob
-from tweetutils import vectorize_tweets
-from tweetutils import silhouette_analysis
-from tweetutils import cluster_to_port
-from tweetutils import clusterinfo
+import tweetutils
 import shutil
 import time
 
 if __name__ == '__main__':
 	
 	# ongoing tweet collection list
-	mastertweetlist = []
+	tweetlistmaster = []
 	roundnumber = 1
 
 	while True:
@@ -23,26 +20,41 @@ if __name__ == '__main__':
 				f = open(fil, 'r')
 				tweet_batch = json.load(f)
 
-				# append to master list
-				mastertweetlist = mastertweetlist + tweet_batch
+				# remove retweets
+				tweet_batch_noRT = tweetutils.RT_removal(tweet_batch)
+
+				print len(tweet_batch) - len(tweet_batch_noRT), ' Retweets removed'
+
+				# append file data to full list
+				tweetlistmaster = tweetlistmaster + tweet_batch_noRT
+
+				print 'clustering on: ', len(tweetlistmaster), ' tweets'
+
+				tweetlistmaster = tweetlistmaster + tweet_batch
 
 				# movefiles once loaded
 				newpath = "data/processed_data/" + fil[18:]
-
 				shutil.move(fil, newpath)
 
 
-			# vectorize master list
-			vectorized_tweets, names = vectorize_tweets(mastertweetlist)
+			# vectorize tf-idf -> lsa
+			vect_tweets = tweetutils.tf_idf_lsa_tweets(tweetlist = tweetlistmaster, n_dim = 87)
+
+			# do not get to the point of exclusively individual tweet clusters
+			max_n = int(len(tweetlistmaster) * .5)
 
 			# do silhouette analysis on master list
-			n, tweet_pred = silhouette_analysis(vectorized_tweets)
+			tweet_pred = tweetutils.silhouette_analysis(vect_tweets, max_n = max_n)
 
 			# create cluter information on master list
-			cluster_json = clusterinfo(n = n, vectorized_tweets = vectorized_tweets, names = names, tweetlistmaster = mastertweetlist, tweet_pred = tweet_pred)
+			cluster_df = tweetutils.clusterinfo(tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
 
-			# send master list to visualization
-			cluster_to_port(cluster_json)
+			# write to file
+			tweetutils.counts_to_file(cluster_df=cluster_df, base = newpath[:-4], batchnumber = roundnumber)
 
-			print "finished batch ", roundnumber, " total tweets clustering on ", len(mastertweetlist)
+			# write cluster_df to file
+			cluster_df.to_csv(newpath[:-4] + 'pred'+ '{0}.csv'.format(roundnumber), encoding='utf-8')
+
+
+			print "finished batch ", roundnumber, " total tweets clustering on ", len(tweetlistmaster)
 			roundnumber = roundnumber + 1
