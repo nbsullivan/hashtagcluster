@@ -56,7 +56,7 @@ if __name__ == '__main__':
 			print 'clustering on: ', len(tweetlistmaster), ' tweets'
 
 			# vectorize tf-idf -> lsa
-			vect_tweets = tweetutils.tf_idf_lsa_tweets(tweetlist = tweetlistmaster, n_dim = 87)
+			vect_tweets = tweetutils.tf_idf_lsa_tweets(tweetlist = tweetlistmaster)
 
 			# do not get to the point of exclusively individual tweet clusters
 			max_n = int(len(tweetlistmaster) * .5)

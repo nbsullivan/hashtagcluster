@@ -207,16 +207,22 @@ def hash_tweets(tweetlist):
     hashed_tweets = hasher.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
     return hashed_tweets
 
-def tf_idf_lsa_tweets(tweetlist, n_dim = 200):
+def tf_idf_lsa_tweets(tweetlist):
     """Perform TF-IDF vectorization and then reduce the dimension using truncated
     SVD and normalize to the Euclidean unit ball.
 
     See http://scikit-learn.org/stable/auto_examples/text/document_clustering.html#sphx-glr-auto-examples-text-document-clustering-py"""
+    tfidfer = TfidfVectorizer(stop_words = 'english')
+    tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+
+    # reduce dimenions to 1/3 of total features
+    n_dim = tfidf_tweets.shape[1] / 3
+
     svd = TruncatedSVD(n_dim)
     normalizer = Normalizer(copy = False)
     lsa = make_pipeline(svd, normalizer)
-    tfidfer = TfidfVectorizer(stop_words = 'english')
-    tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+    
+    
     tfidf_tweets = lsa.fit_transform(tfidf_tweets)
 
     return tfidf_tweets
