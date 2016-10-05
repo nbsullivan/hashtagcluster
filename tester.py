@@ -57,6 +57,14 @@ if __name__ == '__main__':
 
 		tweetlistmaster = tweetlistmaster + tweet_batch_noRT
 
+		# if you only want use the 1000 most recent tweets uncomment this, 
+		# note this will make the Total_tweets number in the info_df incorrect
+		if len(tweetlistmaster) > 1000:
+			print "reducing master list size to 1000"
+			reducingindex = len(tweetlistmaster) - 1000
+			tweetlistmaster = tweetlistmaster[reducingindex:]
+
+
 		print 'clustering on: ', len(tweetlistmaster), ' tweets'
 
 		# vectorize tf-idf -> rp
