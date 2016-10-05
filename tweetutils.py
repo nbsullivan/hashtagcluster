@@ -142,15 +142,25 @@ def counts_to_file(cluster_df, base, batchnumber):
     # initializing lists to store dictionary rows
     word_list = []
     user_list = []
+    cluster_size_list = []
 
     n_clusters = max(cluster_df['cluster_pred'].unique()) + 1
 
     for k in range(0,n_clusters):
 
+        cluster_info_dict = {}
         # subset dataframe to a single cluster.
         subset_df = cluster_df[cluster_df['cluster_pred'] == k]
 
         print 'size of cluster ', k, ':', len(subset_df.index)
+
+        # store data on cluster
+        cluster_info_dict['batch'] = batchnumber
+        cluster_info_dict['cluster_number'] = k
+        cluster_info_dict['size'] = len(subset_df.index)
+
+        # append to cluster size list
+        cluster_size_list.append(cluster_info_dict)
 
         # bag of words representation of tweets from cluster
         word_count_dict = dict(Counter(" ".join(subset_df["text"]).split()))
@@ -175,12 +185,13 @@ def counts_to_file(cluster_df, base, batchnumber):
     # put into df for easy writing
     user_df = pd.DataFrame(user_list)
     words_df = pd.DataFrame(word_list)
-
+    cluster_size_df = pd.DataFrame(cluster_size_list)
 
     # write to file
     user_df.to_csv(base + '{0}usercount.csv'.format(batchnumber), encoding='utf-8')
     words_df.to_csv(base + '{0}wordcount.csv'.format(batchnumber), encoding='utf-8')
 
+    return cluster_size_df
 
 
 def tf_idf_tweets(tweetlist):

@@ -24,6 +24,9 @@ if __name__ == '__main__':
 	# prepare list for holding number of RTs removed and number of clusters per batch
 	info_list = []
 
+	# blank df for holding cluster size info
+	sizes_df = pd.DataFrame()
+
 	# base file path
 	base = 'data/millennial/HowtoConfuseaMillennial_batch'
 
@@ -83,8 +86,11 @@ if __name__ == '__main__':
 		info_list.append(batch_info)
 
 
-		# write to file
-		tweetutils.counts_to_file(cluster_df=cluster_df, base = base, batchnumber = k)
+		# write to file and grab cluster sizes df
+		cluster_sizes_df = tweetutils.counts_to_file(cluster_df=cluster_df, base = base, batchnumber = k)
+
+		# append sizes df
+		sizes_df = sizes_df.append(cluster_sizes_df, ignore_index=True)
 
 		# write cluster_df to file
 		cluster_df.to_csv(base + 'pred'+ '{0}.csv'.format(k), encoding='utf-8')
@@ -94,8 +100,11 @@ if __name__ == '__main__':
 
 	info_df['CumRT'] = info_df['RTs'].cumsum()
 
-	print info_df
+	info_df.to_csv(base + 'info.csv')
 
+	sizes_df.to_csv(base + 'clustersize.csv')
+
+	print sizes_df
 
 
 
