@@ -11,6 +11,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.metrics import silhouette_score
 from pprint import pprint as pp
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.random_projection import GaussianRandomProjection
 import numpy as np
 import scipy
 from scipy import sparse
@@ -111,7 +112,7 @@ def vectorize_file(in_files, out_file):
 
 def silhouette_analysis(vectorized_tweets, max_n = 20):
     # need code for silhouette analysis
-    sil_scr_prev = 0
+    sil_scr_prev = -1
     brk = 0
     for n in range(2,max_n):
         print 'testing ', n, ' clusters'
@@ -215,8 +216,8 @@ def tf_idf_lsa_tweets(tweetlist):
     tfidfer = TfidfVectorizer(stop_words = 'english')
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
 
-    # reduce dimenions to 1/3 of total features
-    n_dim = tfidf_tweets.shape[1] / 3
+    # reduce dimenions to 1/4 of total features
+    n_dim = tfidf_tweets.shape[1] / 4
 
     svd = TruncatedSVD(n_dim)
     normalizer = Normalizer(copy = False)
@@ -226,6 +227,29 @@ def tf_idf_lsa_tweets(tweetlist):
     tfidf_tweets = lsa.fit_transform(tfidf_tweets)
 
     return tfidf_tweets
+
+
+def tf_idf_rp_tweets(tweetlist):
+    """Perform TF-IDF vectorization then uses Gaussian random projection"""
+
+    # tf-idf feature extraction
+    tfidfer = TfidfVectorizer(stop_words = 'english')
+    tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
+
+    # random projection
+    trans = GaussianRandomProjection()
+
+    # try and use the default reduced dimension given by the Johnson-Lindenstrauss lemma
+    try:
+        trans = GaussianRandomProjection()
+        RP_tweets = trans.fit_transform(tfidf_tweets)
+    except:
+        n_dim = tfidf_tweets.shape[1] / 4
+        trans = GaussianRandomProjection(n_components = n_dim)
+        RP_tweets = trans.fit_transform(tfidf_tweets)
+
+
+    return RP_tweets
 
 def tf_idf_pca_tweets(tweetlist, n_dim = 200):
     """Like tf_idf_lsa_tweets(), but uses PCA instead of TruncatedSVD."""

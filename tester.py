@@ -28,11 +28,11 @@ if __name__ == '__main__':
 	sizes_df = pd.DataFrame()
 
 	# base file path
-	base = 'data/millennial/HowtoConfuseaMillennial_batch'
+	base = 'data/brangelia/#Brangelina_batch'
 
 
 	# loop over batch numbers
-	for k in range(0,24):
+	for k in range(0,820):
 
 		# start a dictionary to store batch info, (total tweet numbers, RTs removed, number of clusters) 
 		batch_info = {}
@@ -59,8 +59,8 @@ if __name__ == '__main__':
 
 		print 'clustering on: ', len(tweetlistmaster), ' tweets'
 
-		# vectorize tf-idf -> lsa
-		vect_tweets = tweetutils.tf_idf_lsa_tweets(tweetlist = tweetlistmaster)
+		# vectorize tf-idf -> rp
+		vect_tweets = tweetutils.tf_idf_rp_tweets(tweetlist = tweetlistmaster)
 
 		# do not get to the point of exclusively individual tweet clusters
 		max_n = int(len(tweetlistmaster) * .5)
