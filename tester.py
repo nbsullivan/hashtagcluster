@@ -21,50 +21,88 @@ if __name__ == '__main__':
 	# setting up list for tweets to go into this acts like tweetlistmaster in etl
 	tweetlistmaster = []
 
+	# prepare list for holding number of RTs removed and number of clusters per batch
+	info_list = []
 
-	# this will grab the file name where data is stored
+	# blank df for holding cluster size info
+	sizes_df = pd.DataFrame()
+
+	# base file path
+	base = 'data/millennial/HowtoConfuseaMillennial_batch'
+
+
+	# loop over batch numbers
 	for k in range(0,24):
 
-		base = 'data/millennial/HowtoConfuseaMillennial_batch'
+		# start a dictionary to store batch info, (total tweet numbers, RTs removed, number of clusters) 
+		batch_info = {}
 
 		fil = base + '{0}.txt'.format(k)
 
-		# only use millennial data
-		if "HowtoConfuseaMillennial" in fil:
-			print fil
+		print fil
 
-			# open and load the file
-			f = open(fil, 'r')
-			tweet_batch = json.load(f)
+		# open and load the file
+		f = open(fil, 'r')
+		tweet_batch = json.load(f)
 
-			# remove retweets from batch
-			tweet_batch_noRT = tweetutils.RT_removal(tweet_batch)
+		# remove retweets from batch
+		tweet_batch_noRT = tweetutils.RT_removal(tweet_batch)
 
-			print len(tweet_batch) - len(tweet_batch_noRT), ' Retweets removed'
-			# append file data to full list
-			tweetlistmaster = tweetlistmaster + tweet_batch_noRT
+		# track number of RTs removed.
+		RTremoved = len(tweet_batch) - len(tweet_batch_noRT)
 
-			print 'clustering on: ', len(tweetlistmaster), ' tweets'
+		print RTremoved, ' Retweets removed'
+		
+		# append file data to full list
 
-			# vectorize tf-idf -> lsa
-			vect_tweets = tweetutils.tf_idf_lsa_tweets(tweetlist = tweetlistmaster, n_dim = 87)
+		tweetlistmaster = tweetlistmaster + tweet_batch_noRT
 
-			# do not get to the point of exclusively individual tweet clusters
-			max_n = int(len(tweetlistmaster) * .5)
+		print 'clustering on: ', len(tweetlistmaster), ' tweets'
 
-			# do silhouette analysis on master list
-			tweet_pred = tweetutils.silhouette_analysis(vect_tweets, max_n = max_n)
+		# vectorize tf-idf -> lsa
+		vect_tweets = tweetutils.tf_idf_lsa_tweets(tweetlist = tweetlistmaster)
 
-			# create cluter information on master list
-			cluster_df = tweetutils.clusterinfo(tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
+		# do not get to the point of exclusively individual tweet clusters
+		max_n = int(len(tweetlistmaster) * .5)
 
-			# write to file
-			tweetutils.counts_to_file(cluster_df=cluster_df, base = base, batchnumber = k)
+		# do silhouette analysis on master list
+		tweet_pred = tweetutils.silhouette_analysis(vect_tweets, max_n = max_n)
 
-			# write cluster_df to file
-			cluster_df.to_csv(base + 'pred'+ '{0}.csv'.format(k), encoding='utf-8')
+		# create cluter information on master list
+		cluster_df = tweetutils.clusterinfo(tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
+
+		# get number of clusters
+		n_clusters = max(cluster_df['cluster_pred'].unique()) + 1
+
+		# total tweets
+		total_tweets = (k+1)*100
+
+		# build the dictionary of batch information
+		batch_info['Total_tweets'] = total_tweets
+		batch_info['RTs'] = RTremoved
+		batch_info['Clusters'] = n_clusters
+
+		# append batch_info to list
+		info_list.append(batch_info)
 
 
+		# write to file and grab cluster sizes df
+		cluster_sizes_df = tweetutils.counts_to_file(cluster_df=cluster_df, base = base, batchnumber = k)
+
+		# append sizes df
+		sizes_df = sizes_df.append(cluster_sizes_df, ignore_index=True)
+
+		# write cluster_df to file
+		cluster_df.to_csv(base + 'pred'+ '{0}.csv'.format(k), encoding='utf-8')
+
+	# create df of info_list
+	info_df = pd.DataFrame(info_list)
+
+	info_df['CumRT'] = info_df['RTs'].cumsum()
+
+	info_df.to_csv(base + 'info.csv')
+
+	sizes_df.to_csv(base + 'clustersize.csv')
 
 
 

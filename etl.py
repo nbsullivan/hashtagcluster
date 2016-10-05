@@ -80,7 +80,7 @@ if __name__ == '__main__':
 	api = tweepy.API(auth)
 
 	# search term
-	hashTag = '#NationalBoyfriendDay'
+	hashTag = '#WorldTeachersDay'
 	print hashTag
 
 
