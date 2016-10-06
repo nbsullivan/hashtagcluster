@@ -9,6 +9,7 @@ from sklearn.decomposition import PCA
 from sklearn.preprocessing import Normalizer
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import silhouette_score
+from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from pprint import pprint as pp
 from sklearn.cluster import MiniBatchKMeans
 import numpy as np
@@ -17,6 +18,9 @@ from scipy import sparse
 from collections import Counter
 import jsocket
 import pandas as pd
+
+
+sid = SentimentIntensityAnalyzer()
 
 def tweet_counter(tweet_text):
     # input tweet text and output dictionary with keys being tweet text and value being
@@ -245,7 +249,17 @@ def RT_condensor(tweetlistmaster):
 
     return dd
 
+def vader_pos_neg_sim(tweet1, tweet2):
+    s1 = sid.polarity_scores(tweet1)
+    s2 = sid.polarity_scores(tweet2)
 
+    return abs(s2['pos'] - s1['neg'])
+
+def vader_pos_neu_sim(tweet1, tweet2):
+    s1 = sid.polarity_scores(tweet1)
+    s2 = sid_polarity_scores(tweet2)
+
+    return abs(s2['pos'] - s1['neu'])
 
 # def main():
 #     predir = 'data/clean/'
