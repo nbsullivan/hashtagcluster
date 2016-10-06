@@ -5,7 +5,7 @@ import shutil
 import time
 
 if __name__ == '__main__':
-	
+
 	# ongoing tweet collection list
 	tweetlistmaster = []
 	roundnumber = 1
@@ -46,7 +46,7 @@ if __name__ == '__main__':
 			# do silhouette analysis on master list
 			tweet_pred = tweetutils.silhouette_analysis(vect_tweets, max_n = max_n)
 
-			# create cluter information on master list
+			# create cluster information on master list
 			cluster_df = tweetutils.clusterinfo(tweetlistmaster = tweetlistmaster, tweet_pred = tweet_pred)
 
 			# write to file
