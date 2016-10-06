@@ -28,11 +28,11 @@ if __name__ == '__main__':
 	sizes_df = pd.DataFrame()
 
 	# base file path
-	base = 'data/brangelia/#Brangelina_batch'
+	base = 'data/millennial/HowtoConfuseaMillennial_batch'
 
 
 	# loop over batch numbers
-	for k in range(0,820):
+	for k in range(0,24):
 
 		# start a dictionary to store batch info, (total tweet numbers, RTs removed, number of clusters) 
 		batch_info = {}
