@@ -288,6 +288,7 @@ def RT_condensor(tweetlistmaster):
 
     return dd
 
+sid = SentimentIntensityAnalyzer()
 
 def vader_sim(tweet1, tweet2, att_a, att_b):
     """Similarity measure based on the VADER sentiments of each tweet as
@@ -319,13 +320,14 @@ def vader_pos_neu_sim(tweet1, tweet2):
 def spectral_vader(tweetlist, vectorized_tweets, sim_measure = vader_pos_sim, max_n = 20):
     """Perform spectral clustering with VADER and silhouette analysis."""
     affinity_matrix = vader_affinity_matrix(tweetlist, similarity = sim_measure)
-    sil_scr_prev = 0
+    sil_scr_prev = -1
     brk = 0
     for n in range(2,max_n):
         print 'testing ', n, ' clusters'
         # cluster
-        clf = SpectralClustering(n_clusters=n, affinity = affinity_matrix)
-        tweet_pred = clf.fit_predict(vectorized_tweets)
+        clf = SpectralClustering(n_clusters=n, affinity = 'precomputed')
+        clf.fit(affinity_matrix)
+        tweet_pred = clf.fit_predict(affinity_matrix)
         # cluster silhouette scores
         silhouette_avg = silhouette_score(vectorized_tweets, tweet_pred)
         print 'Silhouette average ', silhouette_avg
@@ -349,13 +351,14 @@ def vader_affinity_matrix(tweetlist, similarity = vader_pos_neg_sim):
     """"Compute a real symmetric affinity matrix using a VADER similarity."""
     n_tweets = len(tweetlist)
     affinity_matrix = np.zeros([n_tweets, n_tweets])
+    tweets = map(lambda tweet: tweet['text'], tweetlist)
 
     # compute the values below the diagonal
     for i in xrange(n_tweets):
-        tweet1 = tweetlist[i]
+        tweet1 = tweets[i]
 
         for j in xrange(i):
-            tweet2 = tweetlist[j]
+            tweet2 = tweets[j]
             affinity_matrix[i, j] = similarity(tweet1, tweet2)
 
     # the values above the diagonal are gven by
@@ -364,8 +367,8 @@ def vader_affinity_matrix(tweetlist, similarity = vader_pos_neg_sim):
 
     ## fill in diagonal
     for i in xrange(n_tweets):
-        tweet1 = tweetlist[i]
-        affinity_matrix[i, i] = similarity
+        tweet1 = tweets[i]
+        affinity_matrix[i, i] = similarity(tweet1, tweet1)
 
     return affinity_matrix
 
