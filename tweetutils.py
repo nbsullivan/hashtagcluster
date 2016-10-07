@@ -12,6 +12,7 @@ from sklearn.metrics import silhouette_score
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 from pprint import pprint as pp
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.cluster import SpectralClustering
 import numpy as np
 import scipy
 from scipy import sparse
@@ -23,8 +24,8 @@ import pandas as pd
 sid = SentimentIntensityAnalyzer()
 
 def tweet_counter(tweet_text):
-    # input tweet text and output dictionary with keys being tweet text and value being
-    # a cout of occurances of tweet text
+    """Input tweet text and output dictionary with keys being tweet text and value being
+    # a cout of occurances of tweet text"""
     tweet_freq = [tweet_text.count(i) for i in tweet_text]
     tweet_count = dict(zip(tweet_text, tweet_freq))
 
@@ -114,7 +115,7 @@ def vectorize_file(in_files, out_file):
 
 
 def silhouette_analysis(vectorized_tweets, max_n = 20):
-    # need code for silhouette analysis
+    """Perform MiniBatch K Means clustering with silhouette analysis."""
     sil_scr_prev = 0
     brk = 0
     for n in range(2,max_n):
@@ -249,17 +250,89 @@ def RT_condensor(tweetlistmaster):
 
     return dd
 
-def vader_pos_neg_sim(tweet1, tweet2):
+def vader_sim(tweet1, tweet2, att_a, att_b):
+    """Similarity measure based on the VADER sentiments of each tweet as
+    specified in att_a and att_b."""
     s1 = sid.polarity_scores(tweet1)
     s2 = sid.polarity_scores(tweet2)
 
-    return abs(s2['pos'] - s1['neg'])
+    m1 = np.exp(-np.abs(s1[att_a] - s2[att_b]))
+    m2 = np.exp(-np.abs(s2[att_a] - s1[att_b]))
+
+    return 0.5*(m1 + m2)
+
+def vader_pos_sim(tweet1, tweet2):
+    """Similarity measure based on the positive VADER sentiments of
+    each tweet."""
+    return vader_sim(tweet1, tweet2, 'pos', 'pos')
+    
+
+def vader_pos_neg_sim(tweet1, tweet2):
+    """Similarity measure based on the positive and negative VADER sentiments of
+    each tweet."""
+    return vader_sim(tweet1, tweet2, 'pos', 'neg')
 
 def vader_pos_neu_sim(tweet1, tweet2):
-    s1 = sid.polarity_scores(tweet1)
-    s2 = sid_polarity_scores(tweet2)
+    """Similarity measure based on the positive and negative VADER sentiments of
+    each tweet."""
+    return vader_sim(tweet1, tweet2, 'pos', 'neu')
 
-    return abs(s2['pos'] - s1['neu'])
+def spectral_vader(tweetlist, vectorized_tweets, sim_measure = vader_pos_sim, max_n = 20):
+    """Perform spectral clustering with VADER and silhouette analysis."""
+    affinity_matrix = vader_affinity_matrix(tweetlist, similarity = sim_measure)
+    sil_scr_prev = 0
+    brk = 0
+    for n in range(2,max_n):
+        print 'testing ', n, ' clusters'
+        # cluster
+        clf = SpectralClustering(n_clusters=n, affinity = affinity_matrix)
+        tweet_pred = clf.fit_predict(vectorized_tweets)
+        # cluster silhouette scores
+        silhouette_avg = silhouette_score(vectorized_tweets, tweet_pred)
+        print 'Silhouette average ', silhouette_avg
+
+        # determine number of centroids to use for batch
+        if silhouette_avg <= sil_scr_prev:
+            sil_n = n - 1
+            sil_avg = sil_scr_prev
+            brk = 1
+        # break if previous silhoutte score is smaller
+        if brk == 1:
+            break
+        sil_scr_prev = silhouette_avg
+        sil_pred_prev = tweet_pred
+
+
+    return sil_pred_prev
+
+
+def vader_affinity_matrix(tweetlist, similarity = vader_pos_neg_sim):
+    """"Compute a real symmetric affinity matrix using a VADER similarity."""
+    n_tweets = len(tweetlist)
+    affinity_matrix = np.zeros([n_tweets, n_tweets])
+
+    # compute the values below the diagonal
+    for i in xrange(n_tweets):
+        tweet1 = tweetlist[i]
+        
+        for j in xrange(i):
+            tweet2 = tweetlist[j]
+            affinity_matrix[i, j] = similarity(tweet1, tweet2)
+    
+    # the values above the diagonal are gven by 
+    # affinity_matrix[i, j]  == affinity_matrix[j, i]
+    affinity_matrix = affinity_matrix + affinity_matrix.T
+    
+    ## fill in diagonal
+    for i in xrange(n_tweets):
+        tweet1 = tweetlist[i]
+        affinity_matrix[i, i] = similarity
+    
+    return affinity_matrix
+
+def vader_cluster_sentiment(file_in, file_out):
+    """Perform VADER sentiment analysis on a cluster."""
+    pass
 
 # def main():
 #     predir = 'data/clean/'
