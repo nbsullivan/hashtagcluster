@@ -238,8 +238,6 @@ def tf_idf_rp_tweets(tweetlist):
     tfidfer = TfidfVectorizer(stop_words = 'english')
     tfidf_tweets = tfidfer.fit_transform(map(lambda tweet: tweet['text'], tweetlist))
 
-    # random projection
-    trans = GaussianRandomProjection()
 
     # try and use the default reduced dimension given by the Johnson-Lindenstrauss lemma
     try:
