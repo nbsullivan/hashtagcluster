@@ -331,8 +331,30 @@ def vader_affinity_matrix(tweetlist, similarity = vader_pos_neg_sim):
     return affinity_matrix
 
 def vader_cluster_sentiment(file_in, file_out):
-    """Perform VADER sentiment analysis on a cluster."""
-    pass
+    """Perform VADER sentiment analysis on a set of clusters in batch csv
+    format."""
+    batch_df = pd.read_csv(file_in)
+    tweets = batch_df['text']
+    compound = []
+    pos = []
+    neg = []
+    neu = []
+    
+    for tweet in tweets:
+        s = sid.polarity_scores(tweet)
+        compound = compound + [s['compound']]
+        pos = pos + [s['pos']]
+        neg = neg + [s['neg']]
+        neu = neu + [s['neu']]
+    
+    batch_df['VADERcompound'] = pd.Series(compound)
+    batch_df['VADERpos'] = pd.Series(pos)
+    batch_df['VADERneg'] = pd.Series(neg)
+    batch_df['VADERneu'] = pd.Series(neu)
+    
+    batch_df.to_csv(file_out)
+
+# vader_cluster_sentiment('data/millennial/HowtoConfuseaMillennial_batchpred7.csv', 'mill.csv')
 
 # def main():
 #     predir = 'data/clean/'
