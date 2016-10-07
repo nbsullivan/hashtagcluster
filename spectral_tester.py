@@ -7,6 +7,7 @@ import numpy as np
 import scipy
 from collections import Counter
 import pandas as pd
+import time
 
 
 
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 	# base file path
 	base = 'data/millennial/HowtoConfuseaMillennial_batch'
 
-
+	starttime = time.time()
 	# loop over batch numbers
 	for k in range(0,24):
 
@@ -95,22 +96,26 @@ if __name__ == '__main__':
 
 
 		# write to file and grab cluster sizes df
-		cluster_sizes_df = tweetutils.counts_to_file(cluster_df=cluster_df, base = base, batchnumber = k)
+		cluster_sizes_df = tweetutils.counts_to_file(cluster_df=cluster_df, base = base + 'spectral', batchnumber = k)
 
 		# append sizes df
 		sizes_df = sizes_df.append(cluster_sizes_df, ignore_index=True)
 
 		# write cluster_df to file
-		cluster_df.to_csv(base + 'specpredposneg'+ '{0}.csv'.format(k), encoding='utf-8')
+		cluster_df.to_csv(base + 'spectral'+ '{0}.csv'.format(k), encoding='utf-8')
 
 	# create df of info_list
 	info_df = pd.DataFrame(info_list)
 
 	info_df['CumRT'] = info_df['RTs'].cumsum()
 
-	info_df.to_csv(base + 'info.csv')
+	info_df.to_csv(base + 'spectralinfo.csv')
 
-	sizes_df.to_csv(base + 'clustersize.csv')
+	sizes_df.to_csv(base + 'spectralclustersize.csv')
+
+	finishtime = time.time() - starttime
+
+	print finishtime
 
 
 
