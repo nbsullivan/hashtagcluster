@@ -7,6 +7,7 @@ import numpy as np
 import scipy
 from collections import Counter
 import pandas as pd
+import time
 
 
 
@@ -30,7 +31,7 @@ if __name__ == '__main__':
 	# base file path
 	base = 'data/millennial/HowtoConfuseaMillennial_batch'
 
-
+	starttime = time.time()
 	# loop over batch numbers
 	for k in range(0,24):
 
@@ -111,6 +112,10 @@ if __name__ == '__main__':
 	info_df.to_csv(base + 'info.csv')
 
 	sizes_df.to_csv(base + 'clustersize.csv')
+
+	total_time = time.time() - starttime
+
+	print total_time
 
 
 
