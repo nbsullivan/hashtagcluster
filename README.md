@@ -2,19 +2,18 @@
 
 To Run:
 
-1. Make sure that you have the required stuffs:
+1. Make sure that you have the required packages:
 -Anaconda 2.7
--tweepy package
+-tweepy
 
 2. Save the JSON auth file in the directory below this one.
 
 3. find something that is trending on twitter
 
-4. set hashTag to the topic (line 76 currently)
+4. change the variable hashtag on line 83 of etl.py
 
-5. run the program
+5. start etl.py
 
-Notes:
-Do not overwrite exisiting data files, to do this make sure you do not use a previously used search term. (this will be addressed later on by ensureing unique datafile names.)
+6. start cluster.py
 
-Do not upload the auth file to git, this should go without saying, but one can never be too caeful.
+7. result files will show up in data/processed_data
